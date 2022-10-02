@@ -2,71 +2,167 @@ import React from 'react'
 import './App.css';
 import Cart from './Cart';
 import Navbar from './Navbar';
+import { getFirestore, collection, onSnapshot, addDoc, doc, updateDoc, deleteDoc, query, where} from 'firebase/firestore';
+
+
+
 
 class App extends React.Component {
   constructor() {
     super();
     this.state = {
-      products: [
-          {
-              price:9990,
-              title:'Mobile Phone',
-              qty: 1,
-              img: 'https://images.unsplash.com/photo-1567581935884-3349723552ca?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Nnx8bW9iaWxlfGVufDB8fDB8fA%3D%3D&auto=format&fit=crop&w=500&q=60',
-              id: 1
-          },
-          {
-              price:999,
-              title:'Watch',
-              qty: 1,
-              img: 'https://media.istockphoto.com/photos/a-silver-stainless-steel-analog-watch-picture-id1368179045?b=1&k=20&m=1368179045&s=170667a&w=0&h=a8LiiRDqKVZHLUFt_8iDQvqPfq1Bc7exK7Azdzl6awk=',
-              id: 2
-          },
-          {
-              price:20000,
-              title:'TV',
-              qty: 1,
-              img: 'https://media.istockphoto.com/photos/modern-tv-on-living-room-picture-id1328642672?b=1&k=20&m=1328642672&s=170667a&w=0&h=qvGAotYLoM8wpw3XVURafojFqVSPdTgnACobZdH2ong=',
-              id: 3
-          }
-      ]
+      products: [],
+      loading: true
        
     }// this.state
+    this.db = getFirestore();
  }//consructor
+
+ componentDidMount(){
+  console.log('Inside dis catch');
+      // firebase 
+      // .firestore()
+      // .collection('products')
+      // .get()
+      // .then((snapshot) => {
+      //   console.log(snapshot);
+      //   snapshot.docs.map((doc) => {
+      //     console.log(doc.data());
+      //   });
+
+      //   const products = snapshot.docs.map((doc) =>{
+      //     const data = doc.data();
+      //     data['id'] = doc.id;
+
+      //     return doc.data();
+      //   })
+
+      //   this.setState({
+      //     products: products
+      //   })
+      // })
+
+
+  const q = query(collection(this.db, 'products'), where("title", "==", "laptop"))
+      
+      
+      const loadData = onSnapshot(q, (snapshot) =>{
+        const products = 
+        snapshot.docs.map((doc) => {
+         const data = doc.data();
+         data['id'] = doc.id;
+         console.log(data);
+         return data;
+        })
+
+        this.setState({
+         products: products,
+         loading: false
+        })
+      })
+   
+      
+      
+     
+
+      // const colRef = collection(db, 'products');
+      
+      // getDocs(colRef)
+      //  .then((snapshot) => {
+
+      //    const products = 
+      //    snapshot.docs.map((doc) => {
+      //     const data = doc.data();
+      //     data['id'] = doc.id;
+      //     console.log(data);
+      //     return data;
+      //    })
+
+      //    this.setState({
+      //     products: products,
+      //     loading: false
+      //    })
+
+      //  })
+    }
+ 
 
  handleIncreaseQuantity = (product) => {
    const {products} = this.state;
    const index = products.indexOf(product);
+   
+  //  const docRef = collection(this.db, 'products').doc(products[index].id);
+  
+   const docRef =  doc(this.db, "products", products[index].id);
 
-   products[index].qty += 1;
-
-   this.setState({
-      products: products
+  updateDoc(docRef,{
+    qty: products[index].qty + 1
    })
+   .then(() =>{
+    console.log('Updated successfully')
+   })
+   .catch((error) =>{
+    console.log('error', error);
+   })
+
+  //  products[index].qty += 1;
+
+  //  this.setState({
+  //     products: products
+  //  })
  }
 
  handledecreaseQuantity = (product) => {
   const {products} = this.state;
   const index = products.indexOf(product);
 
-  if(products[index].qty == 0){
-      return;
-  }
+  // if(products[index].qty == 0){
+  //     return;
+  // }
 
-  products[index].qty -= 1;
+  // products[index].qty -= 1;
 
-  this.setState({
-     products: products
-  })
+  // this.setState({
+  //    products: products
+  // })
+  const docRef =  doc(this.db, "products", products[index].id);
+
+  updateDoc(docRef,{
+    qty: products[index].qty - 1
+   })
+   .then(() =>{
+    console.log('Updated successfully')
+   })
+   .catch((error) =>{
+    console.log('error', error);
+   })
+
 }
 
 handleOnDeleteProduct = (id) => {
   const {products} = this.state;
-  const items = products.filter((item) => item.id != id);
 
-  this.setState({
-     products: items
-  })
+  const docRef =  doc(this.db, "products", id);
+
+  deleteDoc(docRef)
+   .then(() =>{
+    console.log('Deleted successfully')
+   })
+   .catch((error) =>{
+    console.log('error', error);
+   })
+
+   
+
+
+
+
+  // console.log('inside delete', products);
+  // const items = products.filter((item) => item.id != id);
+
+  // this.setState({
+  //    products: items
+  // })
 }
 
 getCartCount = () => {
@@ -93,18 +189,38 @@ getCartTotal = () => {
   return countTotal;
 }
 
+addProduct = () =>{
+  const ref = collection(this.db, 'products');
+
+      addDoc(ref, {
+       img:'',
+       qty:3,
+       price:900,
+       title:'Washing machine'
+      })
+       .then((docRef) => {
+         console.log(docRef);
+       })
+       .catch((error) =>{
+        console.log('Error:', error);
+       })
+    
+}
+
   render(){
-    const {products} = this.state;
+    const {products, loading} = this.state;
   return (
     <div className="App">
       <h1>Cart</h1>
       <Navbar count = {this.getCartCount()} />
+      <button onClick = {this.addProduct} style = {{fontSize: 20, padding:20}}>Add Product</button>
       <Cart
        products = {products}
        OnIncreaseQuantity = {this.handleIncreaseQuantity}
        OnDecreaseQuantity = {this.handledecreaseQuantity}
        OnDeleteProduct = {this.handleOnDeleteProduct}
       />
+       {loading && <h1>Loading Products...</h1>}
       <div style={{padding:10, fontSize:20}}>Total: {this.getCartTotal()}</div>
     </div>
   );}

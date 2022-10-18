@@ -43,7 +43,9 @@ class App extends React.Component {
       // })
 
 
-  const q = query(collection(this.db, 'products'), where("title", "==", "laptop"))
+  // const q = query(collection(this.db, 'products'), where("title", "==", "laptop"))
+
+  const q = collection(this.db, 'products');
       
       
       const loadData = onSnapshot(q, (snapshot) =>{
@@ -195,7 +197,7 @@ addProduct = () =>{
       addDoc(ref, {
        img:'',
        qty:3,
-       price:900,
+       price:800,
        title:'Washing machine'
       })
        .then((docRef) => {
@@ -211,9 +213,8 @@ addProduct = () =>{
     const {products, loading} = this.state;
   return (
     <div className="App">
-      <h1>Cart</h1>
       <Navbar count = {this.getCartCount()} />
-      <button onClick = {this.addProduct} style = {{fontSize: 20, padding:20}}>Add Product</button>
+      <button onClick = {this.addProduct} style = {{fontSize: 15, padding:10}}>Add Product</button>
       <Cart
        products = {products}
        OnIncreaseQuantity = {this.handleIncreaseQuantity}

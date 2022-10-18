@@ -3,6 +3,7 @@ import React from 'react';
 const Navbar = (props) => {
   return (
     <div style={styles.nav}>
+      <h1 styles={styles.navbarleft}>Cart</h1>
       <div style={styles.cartIconContainer}>
         <img style={styles.cartIcon} src="https://cdn-icons-png.flaticon.com/128/2838/2838838.png" alt="cart-icon" />
         <span style={styles.cartCount}>{props.count}</span>
@@ -33,7 +34,8 @@ const styles = {
     position: 'absolute',
     right: 0,
     top: -9
-  }
+  },
+
 };
 
 
